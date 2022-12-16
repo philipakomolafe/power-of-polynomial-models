@@ -1,0 +1,94 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+
+#loading the dataset
+df = pd.read_csv("Position_Salaries.csv")
+
+#visualizing both df.level and df.salary
+plt.figure(figsize=(10,5))
+plt.scatter(df.Level, df.Salary, c="green", marker=".")
+plt.title("Workers Level & Pay")
+plt.xlabel("Level")
+plt.ylabel("Salary($)")
+plt.show()
+df.Salary
+
+#getting both targets and features.
+X = df.iloc[:,[1]].values
+y = df.iloc[:,[-1]].values
+
+#creating linear regression model.
+lr_model = LinearRegression()
+lr_model.fit(X, y)
+
+#creating polynomial model.
+poly_reg = PolynomialFeatures(degree = 2)
+X_poly = poly_reg.fit_transform(X)
+lr_poly= LinearRegression()
+lr_poly.fit(X_poly, y)
+
+
+plt.style.use("seaborn-darkgrid")
+fig, ax = plt.subplots()
+ax.plot(X, y, "r", label= "True-Salary")
+ax.plot(X, lr_model.predict(X), "g", label="Predicted-Salary")
+ax.set_title('Truth or Bluff (Linear Regression)')
+ax.set_xlabel('Position(level)')
+ax.set_ylabel('Salary($)')
+ax.legend()
+
+plt.style.use("seaborn-darkgrid")
+fig1, ax1 = plt.subplots()
+ax1.plot(X, y,"r", label="True-Salary")
+ax1.plot(X, lr_poly.predict(poly_reg.fit_transform(X)), 'b', label= "Predicted-Salary")
+ax1.set_title("Salary vs Position (Polynomial Regression)")
+ax1.set_xlabel("Position(Level)")
+ax1.set_ylabel("Salary($)")
+ax1.legend()
+
+lr_poly1 = LinearRegression()
+poly_reg1=PolynomialFeatures(degree=4) #to degree-4
+X_poly2 = poly_reg1.fit_transform(X)
+lr_poly1.fit(X_poly2, y)
+
+plt.style.use("seaborn-darkgrid")
+fig2, ax2 = plt.subplots()
+ax2.plot(X, y,"r", label="True-Salary")
+ax2.plot(X, lr_poly1.predict(poly_reg1.fit_transform(X)), 'b', label= "Predicted-Salary")
+ax2.set_title("Salary vs Position (Polynomial Regression)")
+ax2.set_xlabel("Position(Level)")
+ax2.set_ylabel("Salary($)")
+ax2.legend()
+
+#TESTMODEL function to test model accuarcy.
+def testModel(level):
+    """
+    Inputing values into our (linear/polynomial) model to evaluate 
+    it's accuracy
+    """
+    lr_predict = lr_model.predict([[level]]) #linearRegressionPrediction.
+    pr_predict = lr_poly1.predict(poly_reg1.fit_transform([[level]])) #polynomialRegressionPrediction.
+
+    # fig, x = plt.subplots()
+    plt.figure(figsize=(10,5))
+    plt.scatter(lr_predict, pr_predict)
+    plt.xlabel("Linear Regression Salary prediction($)")
+    plt.ylabel("polynomial regression Salary prediction($)")
+    plt.title("LR-predict vs PR-predict")
+    # x.plot(lr_predict,"r", label = "salaries")
+    # x.plot(pr_predict,"b", label = "salaries")
+    plt.show()
+
+    if lr_predict == pr_predict:
+        return 'Accurate Salary prediction: ${0}'.format(lr_predict)
+    elif (lr_predict < pr_predict) or (lr_predict > pr_predict):
+        return "Inaccurate Salary Prediction: ${0}!".format(lr_predict)
+    
+    
+    
+    
+testMl = testModel(6)
+print(testMl)
